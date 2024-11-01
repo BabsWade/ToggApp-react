@@ -1,70 +1,259 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import React, { useEffect, useState } from 'react';
+import { View, FlatList, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Recette } from '@/types/Recette';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { StackNavigationProp } from '@react-navigation/stack';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+type HomeScreenProps = {
+  navigation: StackNavigationProp<any>;
+};
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const [recipes, setRecipes] = useState<Recette[]>([]);
+  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('tout');
+
+  const additionalCategories = [
+    { key: 'tout', title: 'Tout' },
+    { key: 'entrée', title: 'Entrée' },
+    { key: 'boissons', title: 'Boissons' },
+    { key: 'fastfood', title: 'Fast-food' },
+    { key: 'patisserie', title: 'Pâtisserie' },
+  ];
+
+  useEffect(() => {
+    const loadRecipes = async () => {
+      const storedRecipes = await AsyncStorage.getItem('recipes');
+      if (storedRecipes) {
+        setRecipes(JSON.parse(storedRecipes));
+      } else {
+        const dummyRecipes: Recette[] = [
+          {
+            id: '1',
+            name: 'Salade',
+            userName: 'Khadoush delices',
+            image: require('@/assets/images/entree-salade.jpg'),
+            category: 'entrée',
+            ingredients: ['Laitue romaine', 'Poulet', 'Croutons', 'Parmesan', 'Sauce César'],
+            instructions: 'Mélanger tous les ingrédients dans un grand saladier.',
+            isFavoritets: false,
+          },
+          {
+            id: '2',
+            name: 'Smoothie Tropical',
+            userName: 'Khadoush delices',
+            image: require('@/assets/images/smoothie.jpg'),
+            category: 'boissons',
+            ingredients: ['Banane', 'Mangue', 'Jus d\'orange', 'Yaourt'],
+            instructions: 'Mixer tous les ingrédients jusqu\'à obtenir une consistance lisse.',
+            isFavoritets: false,
+          },
+        ];
+        setRecipes(dummyRecipes);
+      }
+    };
+
+    loadRecipes();
+  }, []);
+
+  const filteredRecipes = recipes.filter(recette =>
+    recette.name.toLowerCase().includes(searchText.toLowerCase())
   );
-}
+
+  const renderRecipeItem = ({ item }: { item: Recette }) => (
+    <ThemedView style={styles.recipeItem}>
+      {/* Vérifie si l'image est une URL ou une image locale */}
+      <Image 
+        source={typeof item.image === 'string' ? { uri: item.image } : item.image} 
+        style={styles.image} 
+      />
+      <View style={styles.recipeInfo}>
+        <ThemedText style={styles.titrePlat}>{item.name}</ThemedText>
+        <ThemedText>{item.userName}</ThemedText>
+      </View>
+    </ThemedView>
+  );
+
+  const filteredCategoryRecipes = selectedCategory === 'tout'
+    ? filteredRecipes
+    : filteredRecipes.filter(recette => recette.category === selectedCategory);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <ThemedText style={styles.logoText}>ToggApp</ThemedText>
+      </View>
+
+      <ThemedView style={styles.mainContent}>
+        <View style={styles.header}>
+          <ThemedText style={styles.boldText}>{recipes.length} recettes</ThemedText>
+        </View>
+
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Rechercher une recette..."
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+
+        <View style={styles.categoriesTitre}>
+          <ThemedText style={styles.boldText}>Catégories</ThemedText>
+        </View>
+        <View style={styles.additionalCategoriesContainer}>
+          <FlatList
+            data={additionalCategories}
+            horizontal
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.categoryButton, selectedCategory === item.key && styles.activeCategoryButton]}
+                onPress={() => setSelectedCategory(item.key)}
+              >
+                <ThemedText 
+                  style={[styles.categoryButtonText, selectedCategory === item.key && styles.activeCategoryButtonText]}
+                >
+                  {item.title}
+                </ThemedText>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item.key}
+          />
+        </View>
+
+        <FlatList
+          data={filteredCategoryRecipes}
+          renderItem={renderRecipeItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+        />
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.roundButton}
+            onPress={() => navigation.navigate('AddRecette')}
+          >
+            <Icon name="add" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F3F3F3',
+  },
+  logoContainer: {
+    backgroundColor: '#c92749', 
+    paddingTop: 20,
+    paddingLeft: 10,
+    paddingBottom: 20,
+    width: '100%', 
+    marginTop: 30,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+  },
+  logoText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 24, 
+    flexGrow: 1, 
+    alignSelf: 'flex-start'
+  },
+  mainContent: {
+    flex: 1, 
+    padding: 15,
+    backgroundColor: '#F3F3F3',
+  },
+  header: {
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  searchInput: {
+    height: 45,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  recipeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    marginVertical: 5,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 5,
+    marginRight: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  recipeInfo: {
+    flex: 1,
+  },
+  buttonContainer: {
     position: 'absolute',
+    right: 15,
+    bottom: 15,
+    alignItems: 'flex-end',
+  },
+  roundButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFB700',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+  },
+  additionalCategoriesContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  categoryButton: {
+    borderWidth: 0,
+    borderColor: '#c92749',
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    marginRight: 10,
+  },
+  activeCategoryButton: {
+    backgroundColor: '#a9203b',
+    color: '#ffffff',
+  },
+  activeCategoryButtonText: {
+    color: '#ffffff',
+  },
+  categoryButtonText: {
+    color: '#C92749',
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  categoriesTitre: {
+    marginBottom: 0,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  titrePlat: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  listContent: {
+    paddingBottom: 100,
   },
 });
+
+export default HomeScreen;

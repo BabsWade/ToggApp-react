@@ -11,9 +11,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#ffffff', // Couleur de l'icône active
+        tabBarInactiveTintColor: '#ffffff', // Couleur des icônes inactives
         headerShown: false,
-      }}>
+        tabBarStyle: {
+          backgroundColor: '#C92749', // Couleur de fond de la barre
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -23,15 +28,27 @@ export default function TabLayout() {
           ),
         }}
       />
+      
       <Tabs.Screen
-        name="explore"
+        name="favoris"
         options={{
-          title: 'Explore',
+          title: 'Favoris',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+            <TabBarIcon name={focused ? 'heart' : 'heart-outline'} color={color} />
           ),
         }}
       />
+      
+      <Tabs.Screen
+        name="profil"
+        options={{
+          title: 'Profil',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+          ),
+        }}
+      />
+     
     </Tabs>
   );
 }
