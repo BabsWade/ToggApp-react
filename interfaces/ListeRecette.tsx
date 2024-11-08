@@ -85,7 +85,7 @@ const ListeRecette: React.FC<ListeRecetteProps> = ({ navigation }) => {
           />
         )}
       />
-      <Button title="Ajouter une recette" onPress={() => navigation.navigate('AddRecette')} />
+      <Button title="Ajouter une recette" onPress={() => navigation.navigate('AjoutRecette')} />
     </View>
   );
 };

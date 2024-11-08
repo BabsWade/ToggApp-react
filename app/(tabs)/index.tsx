@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, FlatList, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Recette } from '@/types/Recette';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,8 +7,11 @@ import { ThemedView } from '@/components/ThemedView';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+
+
 type HomeScreenProps = {
   navigation: StackNavigationProp<any>;
+  
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
@@ -59,21 +62,41 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     loadRecipes();
   }, []);
 
+  const deleteRecipe = async (id: string) => {
+    Alert.alert(
+      "Supprimer la recette",
+      "Êtes-vous sûr de vouloir supprimer cette recette ?",
+      [
+        { text: "Annuler" },
+        { text: "Supprimer", onPress: async () => {
+          const updatedRecipes = recipes.filter(recipe => recipe.id !== id);
+          setRecipes(updatedRecipes);
+          await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));
+        }},
+      ]
+    );
+  };
+
   const filteredRecipes = recipes.filter(recette =>
     recette.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const renderRecipeItem = ({ item }: { item: Recette }) => (
     <ThemedView style={styles.recipeItem}>
-      {/* Vérifie si l'image est une URL ou une image locale */}
-      <Image 
-        source={typeof item.image === 'string' ? { uri: item.image } : item.image} 
-        style={styles.image} 
-      />
+      <Image source={typeof item.image === 'string' ? { uri: item.image } : item.image} style={styles.image} />
       <View style={styles.recipeInfo}>
         <ThemedText style={styles.titrePlat}>{item.name}</ThemedText>
         <ThemedText>{item.userName}</ThemedText>
       </View>
+      <TouchableOpacity
+      onPress={() => navigation.navigate('RecetteDetails', { recette: item })} // Navigation vers la page des détails
+    >
+      <Icon name="info" size={24} color="blue" />
+    </TouchableOpacity>
+      <TouchableOpacity onPress={() => deleteRecipe(item.id)}>
+    
+      <Icon name="delete" size={24} color="red" />
+      </TouchableOpacity>
     </ThemedView>
   );
 
@@ -98,8 +121,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           value={searchText}
           onChangeText={setSearchText}
         />
-
-        <View style={styles.categoriesTitre}>
+<View style={styles.categoriesTitre}>
           <ThemedText style={styles.boldText}>Catégories</ThemedText>
         </View>
         <View style={styles.additionalCategoriesContainer}>
@@ -121,7 +143,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             keyExtractor={(item) => item.key}
           />
         </View>
-
         <FlatList
           data={filteredCategoryRecipes}
           renderItem={renderRecipeItem}
@@ -129,14 +150,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
         />
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.roundButton}
-            onPress={() => navigation.navigate('AddRecette')}
-          >
-            <Icon name="add" size={24} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
+<View style={styles.buttonContainer}>
+  <TouchableOpacity
+    style={styles.roundButton}
+    onPress={() => navigation.navigate('Test')} // Redirige vers AddRecetteScreen
+  >
+    <Icon name="add" size={24} color="#ffffff" />
+  </TouchableOpacity>
+</View>
+
       </ThemedView>
     </View>
   );

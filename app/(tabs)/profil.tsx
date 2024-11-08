@@ -16,7 +16,7 @@ const Profil: React.FC = () => {
   };
 
   return (
-    {/*<View style={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.title}>Mon Profil</Text>
 
       <TextInput
@@ -35,7 +35,7 @@ const Profil: React.FC = () => {
 
       <Button title="Enregistrer" onPress={handleEdit} />
       <Button title="Se déconnecter" onPress={handleLogout} color="red" />
-    </View>*/}
+    </View>
   );
 };
 

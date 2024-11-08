@@ -1,63 +1,54 @@
 import SQLite from 'react-native-sqlite-storage';
-import { Recette } from './types/Recette';
 
-const db = SQLite.openDatabase(
-  {
-    name: 'togg.db',
-    location: 'default',
-  },
-  () => {},
-  error => {
-    console.error("Erreur lors de l'ouverture de la base de données :", error);
-  }
-);
+// Ouvrir la base de données
+const openDatabase = () => {
+  return SQLite.openDatabase(
+    { name: 'recettes.db', location: 'default' },
+    () => console.log('Base de données ouverte avec succès'),
+    (err) => console.log('Erreur lors de l\'ouverture de la base de données: ', err)
+  );
+};
 
+// Créer la table et insérer des données fictives
 export const initializeDatabase = () => {
-  db.transaction(tx => {
+  const db = openDatabase();
+
+  db.transaction((tx) => {
     tx.executeSql(
-      'CREATE TABLE IF NOT EXISTS recettes (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, ingredients TEXT, instructions TEXT, image TEXT, category TEXT, isFavoritets INTEGER, userName TEXT);'
+      'CREATE TABLE IF NOT EXISTS recettes (id INTEGER PRIMARY KEY AUTOINCREMENT, nom_plat TEXT, cuisinier TEXT)',
+      [],
+      () => console.log('Table créée avec succès'),
+      (err) => console.log('Erreur lors de la création de la table: ', err)
+    );
+
+    // Insertion des données fictives
+    tx.executeSql(
+      'INSERT INTO recettes (nom_plat, cuisinier) VALUES (?, ?), (?, ?), (?, ?)',
+      ['Pizza Margherita', 'Chef Luigi', 'Tarte Tatin', 'Chef Pierre', 'Burger Royale', 'Chef Clara'],
+      () => console.log('Données insérées avec succès'),
+      (err) => console.log('Erreur lors de l\'insertion des données: ', err)
     );
   });
+
+  return db;
 };
 
-export const getRecipes = (): Promise<Recette[]> => {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM recettes',
-        [],
-        (tx, results) => {
-          const recipes: Recette[] = [];
-          for (let i = 0; i < results.rows.length; i++) {
-            const item = results.rows.item(i);
-            recipes.push({
-              ...item,
-              ingredients: item.ingredients ? JSON.parse(item.ingredients) : [], // Assurer un tableau par défaut
-            });
-          }
-          resolve(recipes);
-        },
-        (tx, error) => {
-          console.error("Erreur lors de la récupération des recettes :", error);
-          reject(error);
-        }
-      );
-    });
-  });
-};
+// Fonction pour récupérer les recettes
+export const getRecipes = (callback) => {
+  const db = openDatabase();
 
-export const addRecipe = (recipe: Recette): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'INSERT INTO recettes (name, ingredients, instructions, image, category, isFavoritets, userName) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [recipe.name, JSON.stringify(recipe.ingredients), recipe.instructions, recipe.image, recipe.category, recipe.isFavoritets ? 1 : 0, recipe.userName],
-        () => resolve(),
-        (tx, error) => {
-          console.error("Erreur lors de l'ajout de la recette :", error);
-          reject(error);
+  db.transaction((tx) => {
+    tx.executeSql(
+      'SELECT * FROM recettes',
+      [],
+      (tx, results) => {
+        const recipes = [];
+        for (let i = 0; i < results.rows.length; i++) {
+          recipes.push(results.rows.item(i));
         }
-      );
-    });
+        callback(recipes);
+      },
+      (err) => console.log('Erreur lors de la récupération des recettes: ', err)
+    );
   });
 };
