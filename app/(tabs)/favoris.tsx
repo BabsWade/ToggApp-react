@@ -26,7 +26,7 @@ const Favoris: React.FC = () => {
   const renderFavoriItem = ({ item }: { item: Recette }) => (
     <TouchableOpacity
       style={styles.favoriItem}
-      onPress={() => navigation.navigate('AddRecetteScreen', { recette: item })} // Navigation vers l'écran de détails de la recette
+      onPress={() => navigation.navigate('DetailsRecetteScreen', { recette: item })} // Navigation vers l'écran de détails de la recette
     >
       <Text style={styles.titrePlat}>{item.name}</Text>
        {item.image ? (
@@ -37,7 +37,7 @@ const Favoris: React.FC = () => {
       
       <Text style={styles.sectionTitle}>Ingrédients</Text>
       <Text style={styles.userName}>{item.userName}</Text>
-      <Text style={styles.description}>{item.ingredients}</Text>
+      <Text style={styles.ingredients}>{item.ingredients}</Text>
     </TouchableOpacity>
   );
 
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     color: '#888',
     marginBottom: 10,
   },
-  description: {
+  ingredients: {
     fontSize: 16,
     color: '#333',
   },

@@ -39,7 +39,7 @@ export default function TabLayout() {
         }}
       />
       
-      <Tabs.Screen
+      {/*<Tabs.Screen
         name="profil"
         options={{
           title: 'Profil',
@@ -47,7 +47,7 @@ export default function TabLayout() {
             <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
           ),
         }}
-      />
+      />*/}
       
       
      

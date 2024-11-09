@@ -5,12 +5,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Importation des composants
 import ListeRecette from './interfaces/ListeRecette';  
-import Favoris from '@/interfaces/Favoris';     
-import AddRecetteScreen from '@/app/AddRecetteScreen';  
+import Favoris from '@/interfaces/Favoris';       
 import RecetteDetailsScreen from '@/app/RecetteDetailsScreen'; 
 import AjouterCategorieScreen from '@/app/AjouterCategorieScreen';  
 
 import { RootStackParamList } from './types';  // Importation de RootStackParamList
+import AddRecetteScreen from './app/AddRecetteScreen';
+import EditRecetteScreen from './app/EditRecetteScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();  // Utilisation du type ici
 const Tab = createBottomTabNavigator();
@@ -34,6 +35,7 @@ export default function App() {
         <Stack.Screen name="AddRecette" component={AddRecetteScreen} />
         <Stack.Screen name="RecetteDetailsScreen" component={RecetteDetailsScreen} />
         <Stack.Screen name="AjouterCategorie" component={AjouterCategorieScreen} />
+        <Stack.Screen name="EditRecetteScreen" component={EditRecetteScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

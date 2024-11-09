@@ -42,6 +42,7 @@
     "react-native-screens": "^3.31.1",
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-tab-view": "^3.5.2",
+    "react-native-toast-message": "^2.2.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.10",
     "toggapp": "file:"

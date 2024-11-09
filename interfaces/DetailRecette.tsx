@@ -20,7 +20,7 @@ const DetailRecette: React.FC<DetailRecetteProps> = ({ route }) => {
       <Text style={styles.sectionTitle}>Ingrédients</Text>
       <Text style={styles.userName}>{recette.userName}</Text>
 
-      <Text style={styles.description}>{recette.instructions}</Text>
+      <Text style={styles.ingredients}>{recette.instructions}</Text>
     </ScrollView>
   );
 };
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     color: '#888',
     marginBottom: 10,
   },
-  description: {
+  ingredients: {
     fontSize: 16,
     color: '#333',
   },

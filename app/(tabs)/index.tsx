@@ -5,12 +5,10 @@ import { Recette } from '@/types/Recette';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';  // Importation de useNavigation
-
-import { StackNavigationProp } from '@react-navigation/stack'; // Pour typer la navigation
-import { RootStackParamList } from '@/types';  // Importation des types de navigation
-import { auth } from 'firebase-admin';
-import { content } from 'googleapis/build/src/apis/content';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack'; 
+import { RootStackParamList } from '@/types';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Typage des props de navigation
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
@@ -19,8 +17,6 @@ const HomeScreen = () => {
   const [recipes, setRecipes] = useState<Recette[]>([]);
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('tout');
-
-  // Utilisation de useNavigation avec le type explicite
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const additionalCategories = [
@@ -31,37 +27,44 @@ const HomeScreen = () => {
     { key: 'patisserie', title: 'Pâtisserie' },
   ];
 
-  useEffect(() => {
-    const loadRecipes = async () => {
-      const storedRecipes = await AsyncStorage.getItem('recipes');
-      if (storedRecipes) {
-        setRecipes(JSON.parse(storedRecipes));
-      } else {
-        const dummyRecipes: Recette[] = [
-          {
-            id: '',
-            name: '',
-            userName: '',
-            image: require('@/assets/images/entree-salade.jpg'),
-            category: '',
-            ingredients: '',
-            instructions: '',
-            isFavoritets: false,
-          },
-         
-        ];
-        setRecipes(dummyRecipes);
-      }
-    };
+  // Chargement des recettes depuis AsyncStorage
+  const loadRecipes = async () => {
+    const storedRecipes = await AsyncStorage.getItem('recipes');
+    if (storedRecipes) {
+      setRecipes(JSON.parse(storedRecipes));
+    } else {
+      const dummyRecipes: Recette[] = [
+        {
+          id: '1',
+          name: 'Salade',
+          userName: 'User',
+          image: require('@/assets/images/entree-salade.jpg'),
+          category: 'entrée',
+          ingredients: 'Laitue, tomates, oignon',
+          instructions: 'Mélangez tous les ingrédients',
+          isFavoritets: false,
+        },
+      ];
+      setRecipes(dummyRecipes);
+    }
+  };
 
+  useEffect(() => {
     loadRecipes();
   }, []);
 
+  // Utiliser useFocusEffect pour rafraîchir la liste quand l'écran devient actif
+  useFocusEffect(
+    React.useCallback(() => {
+      loadRecipes(); // Recharger les recettes à chaque fois que l'écran devient actif
+    }, [])
+  );
+
+  // Gérer le like d'une recette
   const likeRecipe = async (id: string) => {
     const updatedRecipes = recipes.map(recipe => {
       if (recipe.id === id) {
-        // Inverse l'état de isFavoritets
-        return { ...recipe, isFavoritets: !recipe.isFavoritets };
+        return { ...recipe, isFavoritets: !recipe.isFavoritets }; // Toggle the favorite status
       }
       return recipe;
     });
@@ -70,6 +73,7 @@ const HomeScreen = () => {
     await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));  // Met à jour le stockage
   };
 
+  // Gérer la suppression d'une recette
   const deleteRecipe = async (id: string) => {
     Alert.alert(
       "Supprimer la recette",
@@ -80,63 +84,50 @@ const HomeScreen = () => {
           const updatedRecipes = recipes.filter(recipe => recipe.id !== id);
           setRecipes(updatedRecipes);
           await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));
-        }} ,
+        }},
       ]
     );
   };
 
+  // Filtrer les recettes en fonction du texte de recherche
   const filteredRecipes = recipes.filter(recette =>
     recette.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  
-
-  const renderRecipeItem = ({ item }: { item: Recette }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('RecetteDetailsScreen', { recette: item })}>
-  <ThemedView style={styles.cardContainer}>
-      {/* Image avec largeur complète */}
-      <Image
-        source={typeof item.image === 'string' ? { uri: item.image } : item.image}
-        style={styles.cardImage}
-      />
-      
-      {/* Titre du plat avec fond rose */}
-      <View style={styles.titleContainer}>
-        <ThemedText style={styles.titleText}>{item.name}</ThemedText>
-      </View>
-
-      {/* Ingrédients */}
-      <View style={styles.ingredientsContainer}>
-        <ThemedText style={styles.ingredientsText}>{item.ingredients}</ThemedText>
-      </View>
-
-      {/* Boutons Like, Supprimer, et Éditer */}
-      <View style={styles.buttonContainer}>
-      <TouchableOpacity onPress={() => deleteRecipe(item.id)} style={styles.button}>
-          <Icon name="edit" size={18} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => deleteRecipe(item.id)} style={styles.button}>
-          <Icon name="delete" size={18} color="#fff" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => likeRecipe(item.id)} style={styles.button}>
-          <Icon name="thumb-up" size={18} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </ThemedView>
-</TouchableOpacity>
-
-
-  );
-
+  // Filtrer les recettes par catégorie
   const filteredCategoryRecipes = selectedCategory === 'tout'
     ? filteredRecipes
     : filteredRecipes.filter(recette => recette.category === selectedCategory);
 
+  const renderRecipeItem = ({ item }: { item: Recette }) => (
+    <TouchableOpacity onPress={() => navigation.navigate('DetailsRecetteScreen', { recette: item })}>
+      <ThemedView style={styles.cardContainer}>
+        <Image source={typeof item.image === 'string' ? { uri: item.image } : item.image} style={styles.cardImage} />
+        <View style={styles.titleContainer}>
+          <ThemedText style={styles.titleText}>{item.name}</ThemedText>
+        </View>
+        <View style={styles.ingredientsContainer}>
+          <ThemedText style={styles.ingredientsText}>{item.ingredients}</ThemedText>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate('EditRecetteScreen', { recette: item })} style={styles.button}>
+            <Icon name="edit" size={18} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => deleteRecipe(item.id)} style={styles.button}>
+            <Icon name="delete" size={18} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => likeRecipe(item.id)} style={styles.button}>
+            <Icon name="thumb-up" size={18} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <ThemedText style={styles.logoText}>ToggApp</ThemedText>
+        <ThemedText style={styles.logoText}>TOGG</ThemedText>
       </View>
 
       <ThemedView style={styles.mainContent}>
@@ -173,6 +164,7 @@ const HomeScreen = () => {
             keyExtractor={(item) => item.key}
           />
         </View>
+
         <FlatList
           data={filteredCategoryRecipes}
           renderItem={renderRecipeItem}
@@ -183,18 +175,15 @@ const HomeScreen = () => {
         <View style={styles.buttonContainer1}>
           <TouchableOpacity
             style={styles.roundButton}
-            onPress={() => navigation.navigate('AddRecetteScreen')} // Utilisation correcte de la route
+            onPress={() => navigation.navigate('AddRecetteScreen')} // Naviguer vers l'écran d'ajout de recette
           >
             <Icon name="add" size={24} color="#ffffff" />
           </TouchableOpacity>
-
-          
         </View>
       </ThemedView>
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   cardContainer: {
