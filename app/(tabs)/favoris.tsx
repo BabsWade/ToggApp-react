@@ -1,50 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Recette } from '/types/Recette';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Recette } from '@/types/Recette';  // Assurez-vous que le type Recette est correctement importé
 
 const Favoris: React.FC = () => {
   const navigation = useNavigation();
   const [favoris, setFavoris] = useState<Recette[]>([]);
 
-  const recettesFictives: Recette[] = [
-    {
-      id: '1',
-      name: 'Salade César',
-      userName: 'Chef John',
-      image: require('@/assets/images/entree-salade.jpg'),
-      instructions: 'Mélanger la laitue romaine, le poulet grillé, les croûtons et la sauce César.',
-    },
-    {
-      id: '2',
-      name: 'Pizza Margherita',
-      userName: 'Mama Mia',
-      image: require('@/assets/images/entree-salade.jpg'), // Assurez-vous que le chemin est correct
-      instructions: 'Etaler la pâte à pizza, ajouter la sauce tomate, la mozzarella et le basilic, puis cuire au four.',
-    },
-    {
-      id: '3',
-      name: 'Tiramisu',
-      userName: 'Dolce Vita',
-      image: require('@/assets/images/entree-salade.jpg'), // Assurez-vous que le chemin est correct
-      instructions: 'Mélanger le mascarpone, le café et les biscuits, puis laisser refroidir.',
-    },
-  ];
-
+  // Fonction pour charger les recettes favorites
   useEffect(() => {
-    setFavoris(recettesFictives);
-  }, []);
+    const loadFavoris = async () => {
+      const storedRecipes = await AsyncStorage.getItem('recipes');
+      if (storedRecipes) {
+        const allRecipes: Recette[] = JSON.parse(storedRecipes);
+        // Filtrer les recettes favorites
+        const favorisRecipes = allRecipes.filter(recipe => recipe.isFavoritets);
+        setFavoris(favorisRecipes);
+      }
+    };
+
+    loadFavoris();
+  }, []); // Se lance au montage de l'écran
 
   const renderFavoriItem = ({ item }: { item: Recette }) => (
     <TouchableOpacity
       style={styles.favoriItem}
-      onPress={() => navigation.navigate('AddRecetteScreen', { recette: item })} // Navigation vers DetailRecette
+      onPress={() => navigation.navigate('AddRecetteScreen', { recette: item })} // Navigation vers l'écran de détails de la recette
     >
       <Text style={styles.titrePlat}>{item.name}</Text>
-      <Image source={item.image} style={styles.image} />
+       {item.image ? (
+      <Image source={{ uri: item.image }} style={styles.image} />
+    ) : (
+      <Text>Aucune image</Text>  // Si l'image n'est pas disponible
+    )}
+      
       <Text style={styles.sectionTitle}>Ingrédients</Text>
       <Text style={styles.userName}>{item.userName}</Text>
-      <Text style={styles.description}>{item.instructions}</Text>
+      <Text style={styles.description}>{item.ingredients}</Text>
     </TouchableOpacity>
   );
 

@@ -8,5 +8,6 @@ export interface Recette {
     category: string;
     isFavoritets?: boolean; // Optionnel
     userName: string;
-    description: string;
+   
 }
+  

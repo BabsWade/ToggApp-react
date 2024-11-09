@@ -4,14 +4,15 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Importation des composants
-import ListeRecette from './interfaces/ListeRecette';      
-import DetailRecette from './interfaces/DetailRecette';   
-import AjoutRecette from './app/AjoutRecette';   
+import ListeRecette from './interfaces/ListeRecette';  
 import Favoris from '@/interfaces/Favoris';     
-import AddRecetteScreen from './app/(tabs)/AddRecetteScreen';  // Assurez-vous que le chemin est correct
-import RecetteDetailsScreen from './app/RecetteDetailsScreen'; // Assurez-vous que le chemin est correct
+import AddRecetteScreen from '@/app/AddRecetteScreen';  
+import RecetteDetailsScreen from '@/app/RecetteDetailsScreen'; 
+import AjouterCategorieScreen from '@/app/AjouterCategorieScreen';  
 
-const Stack = createNativeStackNavigator();
+import { RootStackParamList } from './types';  // Importation de RootStackParamList
+
+const Stack = createNativeStackNavigator<RootStackParamList>();  // Utilisation du type ici
 const Tab = createBottomTabNavigator();
 
 // TabNavigator pour les écrans principaux
@@ -20,8 +21,6 @@ const TabNavigator = () => {
     <Tab.Navigator>
       <Tab.Screen name="ListeRecette" component={ListeRecette} options={{ title: 'Recettes' }} />
       <Tab.Screen name="Favoris" component={Favoris} options={{ title: 'Favoris' }} />
-      {/* Si tu veux afficher l'écran AjoutRecette dans le tab, mets-le ici */}
-      <Tab.Screen name="AjoutRecette" component={AjoutRecette} options={{ title: 'AjoutRecette' }} />
     </Tab.Navigator>
   );
 };
@@ -31,13 +30,10 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        {/* Accueil avec TabNavigator */}
         <Stack.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
-
-        {/* Écrans supplémentaires dans le Stack Navigator */}
-        <Stack.Screen name="DetailRecette" component={DetailRecette} />
         <Stack.Screen name="AddRecette" component={AddRecetteScreen} />
-        <Stack.Screen name="RecetteDetails" component={RecetteDetailsScreen} />
+        <Stack.Screen name="RecetteDetailsScreen" component={RecetteDetailsScreen} />
+        <Stack.Screen name="AjouterCategorie" component={AjouterCategorieScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -48,15 +48,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="AddRecetteScreen"
-        options={{
-          title: 'Ajouter',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'add' : 'add'} color={color} />
-          ),
-        }}
-      />
+      
       
      
     </Tabs>

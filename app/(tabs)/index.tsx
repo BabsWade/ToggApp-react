@@ -4,20 +4,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Recette } from '@/types/Recette';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';  // Importation de useNavigation
 
+import { StackNavigationProp } from '@react-navigation/stack'; // Pour typer la navigation
+import { RootStackParamList } from '@/types';  // Importation des types de navigation
+import { auth } from 'firebase-admin';
+import { content } from 'googleapis/build/src/apis/content';
 
+// Typage des props de navigation
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
-type HomeScreenProps = {
-  navigation: StackNavigationProp<any>;
-  
-};
-
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+const HomeScreen = () => {
   const [recipes, setRecipes] = useState<Recette[]>([]);
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('tout');
+
+  // Utilisation de useNavigation avec le type explicite
+  const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const additionalCategories = [
     { key: 'tout', title: 'Tout' },
@@ -35,25 +39,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       } else {
         const dummyRecipes: Recette[] = [
           {
-            id: '1',
-            name: 'Salade',
-            userName: 'Khadoush delices',
+            id: '',
+            name: '',
+            userName: '',
             image: require('@/assets/images/entree-salade.jpg'),
-            category: 'entrée',
-            ingredients: ['Laitue romaine', 'Poulet', 'Croutons', 'Parmesan', 'Sauce César'],
-            instructions: 'Mélanger tous les ingrédients dans un grand saladier.',
+            category: '',
+            ingredients: '',
+            instructions: '',
             isFavoritets: false,
           },
-          {
-            id: '2',
-            name: 'Smoothie Tropical',
-            userName: 'Khadoush delices',
-            image: require('@/assets/images/smoothie.jpg'),
-            category: 'boissons',
-            ingredients: ['Banane', 'Mangue', 'Jus d\'orange', 'Yaourt'],
-            instructions: 'Mixer tous les ingrédients jusqu\'à obtenir une consistance lisse.',
-            isFavoritets: false,
-          },
+         
         ];
         setRecipes(dummyRecipes);
       }
@@ -61,6 +56,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     loadRecipes();
   }, []);
+
+  const likeRecipe = async (id: string) => {
+    const updatedRecipes = recipes.map(recipe => {
+      if (recipe.id === id) {
+        // Inverse l'état de isFavoritets
+        return { ...recipe, isFavoritets: !recipe.isFavoritets };
+      }
+      return recipe;
+    });
+
+    setRecipes(updatedRecipes);
+    await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));  // Met à jour le stockage
+  };
 
   const deleteRecipe = async (id: string) => {
     Alert.alert(
@@ -72,7 +80,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           const updatedRecipes = recipes.filter(recipe => recipe.id !== id);
           setRecipes(updatedRecipes);
           await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));
-        }},
+        }} ,
       ]
     );
   };
@@ -81,23 +89,44 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     recette.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  
+
   const renderRecipeItem = ({ item }: { item: Recette }) => (
-    <ThemedView style={styles.recipeItem}>
-      <Image source={typeof item.image === 'string' ? { uri: item.image } : item.image} style={styles.image} />
-      <View style={styles.recipeInfo}>
-        <ThemedText style={styles.titrePlat}>{item.name}</ThemedText>
-        <ThemedText>{item.userName}</ThemedText>
+    <TouchableOpacity onPress={() => navigation.navigate('RecetteDetailsScreen', { recette: item })}>
+  <ThemedView style={styles.cardContainer}>
+      {/* Image avec largeur complète */}
+      <Image
+        source={typeof item.image === 'string' ? { uri: item.image } : item.image}
+        style={styles.cardImage}
+      />
+      
+      {/* Titre du plat avec fond rose */}
+      <View style={styles.titleContainer}>
+        <ThemedText style={styles.titleText}>{item.name}</ThemedText>
       </View>
-      <TouchableOpacity
-      onPress={() => navigation.navigate('RecetteDetails', { recette: item })} // Navigation vers la page des détails
-    >
-      <Icon name="info" size={24} color="blue" />
-    </TouchableOpacity>
-      <TouchableOpacity onPress={() => deleteRecipe(item.id)}>
-    
-      <Icon name="delete" size={24} color="red" />
-      </TouchableOpacity>
+
+      {/* Ingrédients */}
+      <View style={styles.ingredientsContainer}>
+        <ThemedText style={styles.ingredientsText}>{item.ingredients}</ThemedText>
+      </View>
+
+      {/* Boutons Like, Supprimer, et Éditer */}
+      <View style={styles.buttonContainer}>
+      <TouchableOpacity onPress={() => deleteRecipe(item.id)} style={styles.button}>
+          <Icon name="edit" size={18} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => deleteRecipe(item.id)} style={styles.button}>
+          <Icon name="delete" size={18} color="#fff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => likeRecipe(item.id)} style={styles.button}>
+          <Icon name="thumb-up" size={18} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </ThemedView>
+</TouchableOpacity>
+
+
   );
 
   const filteredCategoryRecipes = selectedCategory === 'tout'
@@ -112,7 +141,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
       <ThemedView style={styles.mainContent}>
         <View style={styles.header}>
-          <ThemedText style={styles.boldText}>{recipes.length} recettes</ThemedText>
+          <ThemedText style={styles.titreText}>{recipes.length} Recettes</ThemedText>
         </View>
 
         <TextInput
@@ -121,8 +150,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           value={searchText}
           onChangeText={setSearchText}
         />
-<View style={styles.categoriesTitre}>
-          <ThemedText style={styles.boldText}>Catégories</ThemedText>
+
+        <View style={styles.categoriesTitre}>
+          <ThemedText style={styles.titreText}>Catégories</ThemedText>
         </View>
         <View style={styles.additionalCategoriesContainer}>
           <FlatList
@@ -150,21 +180,74 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
         />
 
-<View style={styles.buttonContainer}>
-  <TouchableOpacity
-    style={styles.roundButton}
-    onPress={() => navigation.navigate('Test')} // Redirige vers AddRecetteScreen
-  >
-    <Icon name="add" size={24} color="#ffffff" />
-  </TouchableOpacity>
-</View>
+        <View style={styles.buttonContainer1}>
+          <TouchableOpacity
+            style={styles.roundButton}
+            onPress={() => navigation.navigate('AddRecetteScreen')} // Utilisation correcte de la route
+          >
+            <Icon name="add" size={24} color="#ffffff" />
+          </TouchableOpacity>
 
+          
+        </View>
       </ThemedView>
     </View>
   );
 };
 
+
 const styles = StyleSheet.create({
+  cardContainer: {
+    width: '100%',
+    marginBottom: 15,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+ paddingBottom: 10, // Assure qu'il y ait un espace en bas pour les boutons
+  },
+
+  titreText:{
+fontSize: 16,
+fontWeight: 800,
+  },
+  cardImage: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  titleContainer: {
+    alignSelf: 'flex-start',  // Cette ligne garantit que le container s'ajuste au contenu
+    backgroundColor: '#c92749', 
+    borderRadius: 10,
+    marginTop: -20, // Pour rapprocher le titre de l'image si nécessaire
+    marginLeft: 10, // Espacement sur la gauche
+  },
+  titleText: {
+    fontSize: 18,
+    color: '#fff',
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    marginRight: 10,
+  },
+  ingredientsContainer: {
+    padding: 10,
+  },
+  ingredientsText:{
+fontSize: 12,
+  },
+  buttonContainer1: {
+    position: 'absolute',
+    right: 15,
+    bottom: 15,
+    alignItems: 'flex-end',
+  },
+  button: {
+    padding: 5,
+    backgroundColor: '#ff4081', // Pink button background
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#F3F3F3',
@@ -220,10 +303,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonContainer: {
-    position: 'absolute',
-    right: 15,
-    bottom: 15,
-    alignItems: 'flex-end',
+    flexDirection: 'row',         // Aligne les boutons horizontalement
+    justifyContent: 'space-between', // Espace les boutons de manière égale
+    alignItems: 'center',         // Centre les boutons verticalement
+    paddingHorizontal: 20,        // Espace les boutons à gauche et à droite
+    paddingVertical: 10,          // Espace les boutons par rapport aux ingrédients
+    backgroundColor: '#ffffff',
+    borderTopWidth: 0.5,
+    borderTopColor: '#ddd',
+   
   },
   roundButton: {
     width: 56,

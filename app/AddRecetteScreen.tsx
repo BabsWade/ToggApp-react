@@ -41,7 +41,6 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
       category,
       ingredients,
       instructions,
-      description, // Ajout de la description
       isFavoritets: false,
     };
 
@@ -75,7 +74,7 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Ingrédients (séparés par des virgules)"
+        placeholder="Ingrédients"
         value={ingredients}
         onChangeText={setIngredients}
       />
