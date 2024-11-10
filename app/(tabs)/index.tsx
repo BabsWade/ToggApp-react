@@ -100,24 +100,17 @@ const HomeScreen = () => {
     : filteredRecipes.filter(recette => recette.category === selectedCategory);
 
   const renderRecipeItem = ({ item }: { item: Recette }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('DetailsRecetteScreen', { recette: item })}>
+    <TouchableOpacity onPress={() => navigation.navigate('DetailsRecette', { recette: item })}>
       <ThemedView style={styles.cardContainer}>
         <Image source={typeof item.image === 'string' ? { uri: item.image } : item.image} style={styles.cardImage} />
         <View style={styles.titleContainer}>
           <ThemedText style={styles.titleText}>{item.name}</ThemedText>
         </View>
-        <View style={styles.ingredientsContainer}>
-          <ThemedText style={styles.ingredientsText}>{item.ingredients}</ThemedText>
-        </View>
+       
         <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate('EditRecetteScreen', { recette: item })} style={styles.button}>
-            <Icon name="edit" size={18} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => deleteRecipe(item.id)} style={styles.button}>
-            <Icon name="delete" size={18} color="#fff" />
-          </TouchableOpacity>
+         
           <TouchableOpacity onPress={() => likeRecipe(item.id)} style={styles.button}>
-            <Icon name="thumb-up" size={18} color="#fff" />
+            <Icon name="favorite" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
       </ThemedView>
@@ -175,7 +168,7 @@ const HomeScreen = () => {
         <View style={styles.buttonContainer1}>
           <TouchableOpacity
             style={styles.roundButton}
-            onPress={() => navigation.navigate('AddRecetteScreen')} // Naviguer vers l'écran d'ajout de recette
+            onPress={() => navigation.navigate('AjoutRecette')} // Naviguer vers l'écran d'ajout de recette
           >
             <Icon name="add" size={24} color="#ffffff" />
           </TouchableOpacity>
@@ -292,16 +285,15 @@ fontSize: 12,
     flex: 1,
   },
   buttonContainer: {
-    flexDirection: 'row',         // Aligne les boutons horizontalement
-    justifyContent: 'space-between', // Espace les boutons de manière égale
-    alignItems: 'center',         // Centre les boutons verticalement
-    paddingHorizontal: 20,        // Espace les boutons à gauche et à droite
-    paddingVertical: 10,          // Espace les boutons par rapport aux ingrédients
+    flexDirection: 'row',          // Aligne les boutons horizontalement
+    justifyContent: 'flex-end',    // Aligne les boutons à droite
+    alignItems: 'center',          // Centre les boutons verticalement
+    paddingHorizontal: 20,         // Espace les boutons à gauche et à droite
+    paddingVertical: 5,           // Espace les boutons par rapport aux ingrédients
     backgroundColor: '#ffffff',
-    borderTopWidth: 0.5,
-    borderTopColor: '#ddd',
-   
+    
   },
+  
   roundButton: {
     width: 56,
     height: 56,

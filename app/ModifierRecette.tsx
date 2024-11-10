@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as ImagePicker from 'expo-image-picker';
 
-const EditRecetteScreen = () => {
+const ModifierRecette = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { recette } = route.params;
@@ -16,7 +16,7 @@ const EditRecetteScreen = () => {
   const [instructions, setInstructions] = useState(recette.instructions);
   const [category, setCategory] = useState(recette.category);
   const [image, setImage] = useState(recette.image); // Image à éditer ou à ajouter
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageUri, setImageUri] = useState<string | null>(null); // URI de la nouvelle image si sélectionnée
 
   // Demande d'accès à la galerie et sélection d'une image
   const pickImage = async () => {
@@ -28,7 +28,7 @@ const EditRecetteScreen = () => {
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri); // Stocke l'URI de l'image
+      setImageUri(result.assets[0].uri); // Stocke l'URI de l'image sélectionnée
     } else {
       Alert.alert('Aucune image sélectionnée', 'Vous n\'avez pas sélectionné d\'image.');
     }
@@ -46,22 +46,34 @@ const EditRecetteScreen = () => {
       return;
     }
 
+    // Crée une nouvelle recette avec les informations mises à jour
     const updatedRecipe: Recette = {
       ...recette,
       name,
       ingredients,
       instructions,
       category,
-      image: imageUri || image, // Sauvegarde l'image sélectionnée ou l'image d'origine
+      image: imageUri || image, // Si une nouvelle image a été sélectionnée, on l'utilise, sinon on garde l'image actuelle
     };
 
+    // Récupère les recettes sauvegardées depuis AsyncStorage
     const storedRecipes = await AsyncStorage.getItem('recipes');
     let recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
+    
+    // Trouve l'index de la recette à mettre à jour
     const index = recipes.findIndex((r: Recette) => r.id === recette.id);
     if (index > -1) {
       recipes[index] = updatedRecipe; // Met à jour la recette
-      await AsyncStorage.setItem('recipes', JSON.stringify(recipes));
-      navigation.goBack(); // Retourne à l'écran principal après la sauvegarde
+      await AsyncStorage.setItem('recipes', JSON.stringify(recipes)); // Sauvegarde les recettes modifiées
+      // Met à jour l'état de la recette directement sans changer d'écran
+      setName(updatedRecipe.name);
+      setIngredients(updatedRecipe.ingredients);
+      setInstructions(updatedRecipe.instructions);
+      setCategory(updatedRecipe.category);
+      setImage(updatedRecipe.image);
+      setImageUri(updatedRecipe.image); // Met à jour l'image si nécessaire
+      Alert.alert('Succès', 'La recette a été mise à jour !');
+      navigation.goBack();
     } else {
       Alert.alert("Erreur", "Recette non trouvée.");
     }
@@ -177,4 +189,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditRecetteScreen;
+export default ModifierRecette;

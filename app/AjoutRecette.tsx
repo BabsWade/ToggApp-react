@@ -5,13 +5,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Recette } from '@/types/Recette'; // Assurez-vous que le type Recette est bien défini
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
-const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
+import { useNavigation } from '@react-navigation/native'; // Importer useNavigation
+
+const AjoutRecette = () => {
   const [name, setName] = useState('');
   const [userName, setUserName] = useState('');
   const [category, setCategory] = useState('');
   const [ingredients, setIngredients] = useState('');
   const [instructions, setInstructions] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const navigation = useNavigation(); // Utiliser le hook useNavigation
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -28,12 +32,13 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveAndGoBack = async () => {
+    // Validation des champs
     if (!name || !userName || !category || !ingredients || !instructions) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs.');
       return;
     }
-  
+
     // Crée une nouvelle recette
     const newRecipe: Recette = {
       id: Date.now().toString(),
@@ -45,13 +50,13 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
       instructions,
       isFavoritets: false,
     };
-  
+
     // Récupère les recettes existantes depuis AsyncStorage
     const storedRecipes = await AsyncStorage.getItem('recipes');
     const recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
     recipes.push(newRecipe); // Ajoute la nouvelle recette à la liste
     await AsyncStorage.setItem('recipes', JSON.stringify(recipes)); // Sauvegarde les recettes mises à jour
-  
+
     // Affiche un toast de succès
     Toast.show({
       type: 'success',
@@ -61,7 +66,7 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
       visibilityTime: 3000,
       autoHide: true,
     });
-  
+
     // Réinitialise les champs
     setName('');
     setUserName('');
@@ -69,15 +74,10 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
     setIngredients('');
     setInstructions('');
     setImageUri(null);
-  
-    // Naviguer en arrière et mettre à jour l'écran des recettes
+
+    // Naviguer en arrière
     navigation.goBack(); // Retour à l'écran précédent
-  
-    // Ou utiliser navigation.replace si vous voulez remplacer l'écran actuel
-    // navigation.replace('RecipesListScreen'); // Remplace l'écran actuel (pour forcer la mise à jour)
   };
-  
-  
 
   return (
     <ScrollView style={styles.container}>
@@ -111,8 +111,7 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
         value={instructions}
         onChangeText={setInstructions}
       />
-    
-
+      
       {/* Affichage de l'image si une image a été sélectionnée */}
       {imageUri && <Image source={{ uri: imageUri }} style={styles.imagePreview} />}
 
@@ -124,9 +123,10 @@ const AddRecetteScreen = ({ navigation }: { navigation: any }) => {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={styles.addButton} onPress={handleSave}>
+      <TouchableOpacity style={styles.addButton} onPress={handleSaveAndGoBack}>
         <Text style={styles.buttonText}>Ajouter la recette</Text>
       </TouchableOpacity>
+
       <Toast />
     </ScrollView>
   );
@@ -177,10 +177,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  buttonTextImage:{
+  buttonTextImage: {
     color: '#494949',
     fontSize: 14,
-  }
+  },
 });
 
-export default AddRecetteScreen;
+export default AjoutRecette;

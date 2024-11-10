@@ -10,8 +10,8 @@ import RecetteDetailsScreen from '@/app/RecetteDetailsScreen';
 import AjouterCategorieScreen from '@/app/AjouterCategorieScreen';  
 
 import { RootStackParamList } from './types';  // Importation de RootStackParamList
-import AddRecetteScreen from './app/AddRecetteScreen';
-import EditRecetteScreen from './app/EditRecetteScreen';
+import AjoutRecette from './app/AjoutRecette';
+import ModifierRecette from './app/ModifierRecette';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();  // Utilisation du type ici
 const Tab = createBottomTabNavigator();
@@ -32,10 +32,10 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="AddRecette" component={AddRecetteScreen} />
+        <Stack.Screen name="AddRecette" component={AjoutRecette} />
         <Stack.Screen name="RecetteDetailsScreen" component={RecetteDetailsScreen} />
         <Stack.Screen name="AjouterCategorie" component={AjouterCategorieScreen} />
-        <Stack.Screen name="EditRecetteScreen" component={EditRecetteScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="ModifierRecette" component={ModifierRecette} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
