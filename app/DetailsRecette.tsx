@@ -10,23 +10,23 @@ const DetailsRecette = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { recette } = route.params; // Récupère la recette passée via la navigation
-  const [recipes, setRecipes] = useState<Recette[]>([]); // État pour stocker les recettes
+  const [recipes, setRecette] = useState<Recette[]>([]); // État pour stocker les recipes
   const [currentRecette, setCurrentRecette] = useState<Recette | null>(recette); // Recette affichée
 
-  // Charger les recettes depuis AsyncStorage
-  const loadRecipes = async () => {
-    const storedRecipes = await AsyncStorage.getItem('recipes');
-    if (storedRecipes) {
-      setRecipes(JSON.parse(storedRecipes));
+  // Charger les recipes depuis AsyncStorage
+  const loadRecette = async () => {
+    const storedRecette = await AsyncStorage.getItem('recipes');
+    if (storedRecette) {
+      setRecette(JSON.parse(storedRecette));
     } else {
-      setRecipes([]); // Pas de recettes stockées, initialiser avec une liste vide
+      setRecette([]); // Pas de recipes stockées, initialiser avec une liste vide
     }
   };
 
-  // Recharger les recettes à chaque fois que l'écran de détails devient actif
+  // Recharger les recipes à chaque fois que l'écran de détails devient actif
   useFocusEffect(
     React.useCallback(() => {
-      loadRecipes();
+      loadRecette();
     }, [])
   );
 
@@ -38,10 +38,10 @@ const DetailsRecette = () => {
       [
         { text: "Annuler" },
         { text: "Supprimer", onPress: async () => {
-          // Filtrer les recettes pour supprimer celle choisie
-          const updatedRecipes = recipes.filter(recipe => recipe.id !== currentRecette?.id);
-          setRecipes(updatedRecipes); // Mettre à jour l'état avec les recettes restantes
-          await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes)); // Sauvegarder les recettes mises à jour
+          // Filtrer les recipes pour supprimer celle choisie
+          const updatedRecette = recipes.filter(recette => recette.id !== currentRecette?.id);
+          setRecette(updatedRecette); // Mettre à jour l'état avec les recipes restantes
+          await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecette)); // Sauvegarder les recipes mises à jour
           navigation.goBack(); // Retourner à l'écran précédent après la suppression
         }} ,
       ]

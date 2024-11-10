@@ -56,15 +56,15 @@ const ModifierRecette = () => {
       image: imageUri || image, // Si une nouvelle image a été sélectionnée, on l'utilise, sinon on garde l'image actuelle
     };
 
-    // Récupère les recettes sauvegardées depuis AsyncStorage
-    const storedRecipes = await AsyncStorage.getItem('recipes');
-    let recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
+    // Récupère les recipes sauvegardées depuis AsyncStorage
+    const storedRecette = await AsyncStorage.getItem('recipes');
+    let recipes = storedRecette ? JSON.parse(storedRecette) : [];
     
     // Trouve l'index de la recette à mettre à jour
     const index = recipes.findIndex((r: Recette) => r.id === recette.id);
     if (index > -1) {
       recipes[index] = updatedRecipe; // Met à jour la recette
-      await AsyncStorage.setItem('recipes', JSON.stringify(recipes)); // Sauvegarde les recettes modifiées
+      await AsyncStorage.setItem('recipes', JSON.stringify(recipes)); // Sauvegarde les recipes modifiées
       // Met à jour l'état de la recette directement sans changer d'écran
       setName(updatedRecipe.name);
       setIngredients(updatedRecipe.ingredients);

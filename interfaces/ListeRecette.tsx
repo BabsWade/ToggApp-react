@@ -16,7 +16,7 @@ interface ListeRecetteProps {
 }
 
 const ListeRecette: React.FC<ListeRecetteProps> = ({ navigation }) => {
-  const [recettes, setRecettes] = useState<Recette[]>([]);
+  const [recipes, setRecettes] = useState<Recette[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const [index, setIndex] = useState<number>(0);
   const [routes] = useState([
@@ -27,7 +27,7 @@ const ListeRecette: React.FC<ListeRecetteProps> = ({ navigation }) => {
   ]);
 
   const fetchRecettes = async () => {
-    const storedRecettes = await AsyncStorage.getItem('recettes');
+    const storedRecettes = await AsyncStorage.getItem('recipes');
     setRecettes(storedRecettes ? JSON.parse(storedRecettes) : []);
   };
 
@@ -35,7 +35,7 @@ const ListeRecette: React.FC<ListeRecetteProps> = ({ navigation }) => {
     fetchRecettes();
   }, []);
 
-  const filteredRecettes = recettes.filter(recette =>
+  const filteredRecettes = recipes.filter(recette =>
     recette.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -65,7 +65,7 @@ const ListeRecette: React.FC<ListeRecetteProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.totalCount}>Total de recettes: {recettes.length}</Text>
+      <Text style={styles.totalCount}>Total de recipes: {recipes.length}</Text>
       <TextInput
         style={styles.searchInput}
         placeholder="Rechercher une recette..."

@@ -8,15 +8,15 @@ const Favoris: React.FC = () => {
   const navigation = useNavigation();
   const [favoris, setFavoris] = useState<Recette[]>([]);
 
-  // Fonction pour charger les recettes favorites
+  // Fonction pour charger les recipes favorites
   useEffect(() => {
     const loadFavoris = async () => {
-      const storedRecipes = await AsyncStorage.getItem('recipes');
-      if (storedRecipes) {
-        const allRecipes: Recette[] = JSON.parse(storedRecipes);
-        // Filtrer les recettes favorites
-        const favorisRecipes = allRecipes.filter(recipe => recipe.isFavoritets);
-        setFavoris(favorisRecipes);
+      const storedRecette = await AsyncStorage.getItem('recipes');
+      if (storedRecette) {
+        const allRecette: Recette[] = JSON.parse(storedRecette);
+        // Filtrer les recipes favorites
+        const favorisRecette = allRecette.filter(recette => recette.isFavoritets);
+        setFavoris(favorisRecette);
       }
     };
 

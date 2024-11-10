@@ -25,7 +25,7 @@ const AddRecette: React.FC<AddRecetteProps> = ({ navigation }) => {
       name,
       ingredients: [], // Tu peux éventuellement ajouter des champs pour les ingrédients
       instructions: "", // Et des instructions
-      image: image || require('@/assets/images/default-recipe.jpg'), // Image par défaut si aucune donnée n'est fournie
+      image: image || require('@/assets/images/default-recette.jpg'), // Image par défaut si aucune donnée n'est fournie
       category,
       userName,
     };

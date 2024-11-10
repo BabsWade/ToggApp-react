@@ -51,11 +51,11 @@ const AjoutRecette = () => {
       isFavoritets: false,
     };
 
-    // Récupère les recettes existantes depuis AsyncStorage
-    const storedRecipes = await AsyncStorage.getItem('recipes');
-    const recipes = storedRecipes ? JSON.parse(storedRecipes) : [];
+    // Récupère les recipes existantes depuis AsyncStorage
+    const storedRecette = await AsyncStorage.getItem('recipes');
+    const recipes = storedRecette ? JSON.parse(storedRecette) : [];
     recipes.push(newRecipe); // Ajoute la nouvelle recette à la liste
-    await AsyncStorage.setItem('recipes', JSON.stringify(recipes)); // Sauvegarde les recettes mises à jour
+    await AsyncStorage.setItem('recipes', JSON.stringify(recipes)); // Sauvegarde les recipes mises à jour
 
     // Affiche un toast de succès
     Toast.show({

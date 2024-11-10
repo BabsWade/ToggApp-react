@@ -14,63 +14,63 @@ import { useFocusEffect } from '@react-navigation/native';
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen = () => {
-  const [recipes, setRecipes] = useState<Recette[]>([]);
+  const [recipes, setRecette] = useState<Recette[]>([]);
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('tout');
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const additionalCategories = [
     { key: 'tout', title: 'Tout' },
-    { key: 'entrée', title: 'Entrée' },
-    { key: 'boissons', title: 'Boissons' },
-    { key: 'fastfood', title: 'Fast-food' },
-    { key: 'patisserie', title: 'Pâtisserie' },
+    { key: 'Entrée', title: 'Entrée' },
+    { key: 'Boissons', title: 'Boissons' },
+    { key: 'Fastfood', title: 'Fast-food' },
+    { key: 'Patisserie', title: 'Pâtisserie' },
   ];
 
-  // Chargement des recettes depuis AsyncStorage
-  const loadRecipes = async () => {
-    const storedRecipes = await AsyncStorage.getItem('recipes');
-    if (storedRecipes) {
-      setRecipes(JSON.parse(storedRecipes));
+  // Chargement des recipes depuis AsyncStorage
+  const loadRecette = async () => {
+    const storedRecette = await AsyncStorage.getItem('recipes');
+    if (storedRecette) {
+      setRecette(JSON.parse(storedRecette));
     } else {
-      const dummyRecipes: Recette[] = [
+      const dummyRecette: Recette[] = [
         {
-          id: '1',
-          name: 'Salade',
-          userName: 'User',
+          id: '',
+          name: '',
+          userName: '',
           image: require('@/assets/images/entree-salade.jpg'),
-          category: 'entrée',
-          ingredients: 'Laitue, tomates, oignon',
-          instructions: 'Mélangez tous les ingrédients',
+          category: '',
+          ingredients: '',
+          instructions: '',
           isFavoritets: false,
         },
       ];
-      setRecipes(dummyRecipes);
+      setRecette(dummyRecette);
     }
   };
 
   useEffect(() => {
-    loadRecipes();
+    loadRecette();
   }, []);
 
   // Utiliser useFocusEffect pour rafraîchir la liste quand l'écran devient actif
   useFocusEffect(
     React.useCallback(() => {
-      loadRecipes(); // Recharger les recettes à chaque fois que l'écran devient actif
+      loadRecette(); // Recharger les recipes à chaque fois que l'écran devient actif
     }, [])
   );
 
   // Gérer le like d'une recette
   const likeRecipe = async (id: string) => {
-    const updatedRecipes = recipes.map(recipe => {
-      if (recipe.id === id) {
-        return { ...recipe, isFavoritets: !recipe.isFavoritets }; // Toggle the favorite status
+    const updatedRecette = recipes.map(recette => {
+      if (recette.id === id) {
+        return { ...recette, isFavoritets: !recette.isFavoritets }; // Toggle the favorite status
       }
-      return recipe;
+      return recette;
     });
 
-    setRecipes(updatedRecipes);
-    await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));  // Met à jour le stockage
+    setRecette(updatedRecette);
+    await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecette));  // Met à jour le stockage
   };
 
   // Gérer la suppression d'une recette
@@ -81,23 +81,23 @@ const HomeScreen = () => {
       [
         { text: "Annuler" },
         { text: "Supprimer", onPress: async () => {
-          const updatedRecipes = recipes.filter(recipe => recipe.id !== id);
-          setRecipes(updatedRecipes);
-          await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecipes));
+          const updatedRecette = recipes.filter(recette => recette.id !== id);
+          setRecette(updatedRecette);
+          await AsyncStorage.setItem('recipes', JSON.stringify(updatedRecette));
         }},
       ]
     );
   };
 
-  // Filtrer les recettes en fonction du texte de recherche
-  const filteredRecipes = recipes.filter(recette =>
+  // Filtrer les recipes en fonction du texte de recherche
+  const filteredRecette = recipes.filter(recette =>
     recette.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Filtrer les recettes par catégorie
-  const filteredCategoryRecipes = selectedCategory === 'tout'
-    ? filteredRecipes
-    : filteredRecipes.filter(recette => recette.category === selectedCategory);
+  // Filtrer les recipes par catégorie
+  const filteredCategoryRecette = selectedCategory === 'tout'
+    ? filteredRecette
+    : filteredRecette.filter(recette => recette.category === selectedCategory);
 
   const renderRecipeItem = ({ item }: { item: Recette }) => (
     <TouchableOpacity onPress={() => navigation.navigate('DetailsRecette', { recette: item })}>
@@ -159,7 +159,7 @@ const HomeScreen = () => {
         </View>
 
         <FlatList
-          data={filteredCategoryRecipes}
+          data={filteredCategoryRecette}
           renderItem={renderRecipeItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
